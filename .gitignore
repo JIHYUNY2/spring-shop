@@ -1,0 +1,21 @@
+# 공통
+.DS_Store
+node_modules/
+build/
+dist/
+
+# VS Code
+.vscode/
+
+# Gradle & Spring Boot
+.gradle/
+build/
+out/
+bin/
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse 설정 파일
+.classpath
+.project
+.settings/

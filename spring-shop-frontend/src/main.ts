@@ -1,154 +1,126 @@
-import './styles.css';
-import { api } from './api';
-import { qs, el, fmtPrice, loading, toast } from './ui';
+import { ProductApi, Product } from './api';
+import { $, el } from './ui';
 
-const PAGE = { number: 0, size: 20, sort: 'id,desc', totalPages: 0 };
+/** ================== Theme Toggle ================== */
+const themeBtn = $('#themeToggle') as HTMLButtonElement;
 
-// 테마 초기화/토글
-const THEME_KEY = 'shop_theme';
-(function initTheme(){
-  const saved = localStorage.getItem(THEME_KEY);
-  if (saved === 'light' || saved === 'dark') {
-    document.documentElement.setAttribute('data-theme', saved);
-  } else {
-    const prefersLight = window.matchMedia?.('(prefers-color-scheme: light)').matches;
-    document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
-  }
-})();
-function toggleTheme(){
-  const cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', cur);
-  localStorage.setItem(THEME_KEY, cur);
+type Theme = 'light' | 'dark';
+function applyTheme(t: Theme) {
+  document.documentElement.setAttribute('data-theme', t);
+  // 버튼 라벨/아이콘 전환
+  if (themeBtn) themeBtn.textContent = t === 'light' ? '🌙 다크' : '☀︎ 라이트';
+  localStorage.setItem('theme', t);
 }
-
-// 목록 로드
-async function loadList() {
-  loading(true);
-  try {
-    const page = await api.listProducts(PAGE.number, PAGE.size, PAGE.sort);
-    const items = (page as any).content ?? (page as any);
-    PAGE.totalPages = (page as any).totalPages ?? 1;
-    renderList(Array.isArray(items) ? items : [], page as any);
-  } catch (e: any) {
-    console.error(e);
-    renderList([], { number: 0, totalPages: 0 });
-    toast('목록 로드 실패: ' + e.message, 'error');
-  } finally {
-    loading(false);
-  }
-}
-
-function renderList(items: any[], meta: { number?: number; totalPages?: number }) {
-  const list = qs('#list')!;
-  list.innerHTML = '';
-  const empty = qs('#empty') as HTMLElement;
-  empty.style.display = items.length ? 'none' : 'block';
-
-  items.forEach((p: any) => {
-    const card = el('div', { className: 'product' }, [
-      el('h3', {}, [p.name]),
-      el('div', { className: 'price' }, [fmtPrice(p.price)]),
-      el('div', { className: 'muted' }, [p.description || '']),
-      el('div', { style: 'display:flex; gap:8px; margin-top:10px' }, [
-        el('button', { className: 'ghost', onclick: () => openDetail(p.id) }, ['상세']),
-      ])
-    ]);
-    list.append(card);
+(function initTheme() {
+  const saved = (localStorage.getItem('theme') as Theme) || 'dark';
+  applyTheme(saved);
+  themeBtn?.addEventListener('click', () => {
+    const next: Theme = (document.documentElement.getAttribute('data-theme') === 'light') ? 'dark' : 'light';
+    applyTheme(next);
   });
+})();
 
-  const cur = (meta.number ?? PAGE.number) + 1;
-  const total = meta.totalPages ?? PAGE.totalPages ?? 1;
-  setPageInfo(cur, total);
-}
+/** ================== Products UI ================== */
 
-function setPageInfo(cur: number, total: number) {
-  (qs('#pageInfo') as HTMLElement).textContent = `${cur} / ${total}`;
-  (qs<HTMLButtonElement>('#prev')!).disabled = cur <= 1;
-  (qs<HTMLButtonElement>('#next')!).disabled = cur >= total;
-}
+// 요소 캐시
+const createForm = $('#createForm') as HTMLFormElement;
+const nameInput = $('#name') as HTMLInputElement;
+const priceInput = $('#price') as HTMLInputElement;
+const descInput = $('#description') as HTMLTextAreaElement;
+const createMsg = $('#createMsg');
 
-// 상세/삭제
-async function openDetail(id: number) {
-  loading(true);
+const pageInput = $('#page') as HTMLInputElement;
+const sizeInput = $('#size') as HTMLInputElement;
+const sortSelect = $('#sort') as HTMLSelectElement;
+const refreshBtn = $('#refreshBtn') as HTMLButtonElement;
+
+const listBody = $('#listBody') as HTMLTableSectionElement;
+const pageInfo = $('#pageInfo');
+const prevBtn = $('#prevBtn') as HTMLButtonElement;
+const nextBtn = $('#nextBtn') as HTMLButtonElement;
+const listMsg = $('#listMsg');
+
+let page = 0;
+let size = 10;
+let sort = 'id,desc';
+
+async function load() {
   try {
-    const p = await api.getProduct(id);
-    const body = qs('#detailBody')!;
-    body.innerHTML = '';
-    body.append(
-      el('div', { style: 'display:grid; gap:8px' }, [
-        el('div', {}, [el('div', { className: 'muted' }, ['상품명']), el('div', { style: 'font-weight:700' }, [p.name])]),
-        el('div', {}, [el('div', { className: 'muted' }, ['가격']), el('div', { className: 'price' }, [fmtPrice(p.price)])]),
-        el('div', {}, [el('div', { className: 'muted' }, ['설명']), el('div', {}, [p.description || '—'])]),
-        el('div', {}, [el('div', { className: 'muted' }, ['생성일']), el('div', {}, [new Date(p.createdAt || Date.now()).toLocaleString('ko-KR')])]),
-      ])
+    listMsg!.textContent = '';
+    const data = await ProductApi.list(page, size, sort);
+    renderList(data);
+  } catch (e: any) {
+    listMsg!.innerHTML = `<span class="bad">목록 로드 실패: ${e.message}</span>`;
+  }
+}
+
+function renderList(p: { content: Product[]; number: number; size: number; totalElements: number; totalPages: number; }) {
+  listBody.innerHTML = '';
+  for (const item of p.content) {
+    const tr = el('tr', {},
+      el('td', {}, String(item.id)),
+      el('td', {}, item.name),
+      el('td', {}, item.price.toLocaleString()),
+      el('td', {}, item.description ?? ''),
+      el('td', {}, el('div', { class: 'actions' },
+        el('button', { class: 'btn btn-outline', onClick: () => onEdit(item) }, '수정'),
+        el('button', { class: 'btn btn-danger', onClick: () => onDelete(item.id) }, '삭제')
+      ))
     );
-    (qs<HTMLButtonElement>('#deleteBtn')!).onclick = () => onDelete(id);
-    (qs<HTMLDialogElement>('#detailModal')!).showModal();
-  } catch (e: any) {
-    toast('상세 조회 실패: ' + e.message, 'error');
-  } finally {
-    loading(false);
+    listBody.appendChild(tr);
   }
+  pageInfo!.textContent = `페이지 ${p.number + 1} / ${Math.max(1, p.totalPages)} · 총 ${p.totalElements}개`;
+  prevBtn.disabled = p.number <= 0;
+  nextBtn.disabled = p.number + 1 >= p.totalPages;
 }
 
-async function onDelete(id: number) {
-  if (!confirm('정말 삭제하시겠습니까?')) return;
-  loading(true);
-  try {
-    await api.deleteProduct(id);
-    toast('삭제되었습니다.');
-    (qs<HTMLDialogElement>('#detailModal')!).close();
-    loadList();
-  } catch (e: any) {
-    toast('삭제 실패: ' + e.message, 'error');
-  } finally {
-    loading(false);
-  }
-}
-
-// 등록
-async function onCreate(ev: Event) {
+async function onCreate(ev: SubmitEvent) {
   ev.preventDefault();
-  const form = ev.currentTarget as HTMLFormElement;
-  const fd = new FormData(form);
-  const payload = {
-    name: String(fd.get('name') || '').trim(),
-    price: Number(fd.get('price') || 0),
-    description: String(fd.get('description') || '').trim()
-  };
-  if (!payload.name || !payload.price) {
-    toast('이름/가격은 필수입니다.', 'error');
-    return;
-  }
-  loading(true);
   try {
-    await api.createProduct(payload);
-    form.reset();
-    PAGE.number = 0;
-    toast('상품이 등록되었습니다.');
-    loadList();
+    createMsg!.textContent = '';
+    const p = await ProductApi.create({
+      name: nameInput.value.trim(),
+      price: Number(priceInput.value),
+      description: descInput.value.trim(),
+    });
+    createMsg!.innerHTML = `<span class="good">등록 완료: #${p.id}</span>`;
+    createForm.reset();
+    await load();
   } catch (e: any) {
-    toast('등록 실패: ' + e.message, 'error');
-  } finally {
-    loading(false);
+    createMsg!.innerHTML = `<span class="bad">등록 실패: ${e.message}</span>`;
   }
 }
 
-// 바인딩 & 초기화
-function bindControls() {
-  (qs<HTMLButtonElement>('#prev')!).onclick = () => { if (PAGE.number > 0) { PAGE.number--; loadList(); } };
-  (qs<HTMLButtonElement>('#next')!).onclick = () => { if (PAGE.number + 1 < PAGE.totalPages) { PAGE.number++; loadList(); } };
-  (qs<HTMLSelectElement>('#size')!).onchange = (e: any) => { PAGE.size = Number(e.target.value); PAGE.number = 0; loadList(); };
-  (qs<HTMLSelectElement>('#sort')!).onchange = (e: any) => { PAGE.sort = String(e.target.value); PAGE.number = 0; loadList(); };
-  (qs<HTMLButtonElement>('#openCreate')!).onclick = () => { (qs<HTMLInputElement>('input[name="name"]')!).focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  (qs<HTMLButtonElement>('#closeModal')!).onclick = () => (qs<HTMLDialogElement>('#detailModal')!).close();
-  (qs<HTMLButtonElement>('#closeModal2')!).onclick = () => (qs<HTMLDialogElement>('#detailModal')!).close();
-  (qs<HTMLFormElement>('#createForm')!).addEventListener('submit', onCreate);
-  (qs<HTMLButtonElement>('#themeToggle')!).addEventListener('click', toggleTheme);
+function onEdit(item: Product) {
+  const nextName = prompt('이름 수정 (엔터=유지)', item.name) ?? item.name;
+  const nextPriceStr = prompt('가격 수정 (엔터=유지)', String(item.price)) ?? String(item.price);
+  const nextDesc = prompt('설명 수정 (엔터=유지)', item.description ?? '') ?? (item.description ?? '');
+  const patch: any = {};
+  if (nextName !== item.name) patch.name = nextName.trim();
+  if (Number(nextPriceStr) !== item.price) patch.price = Number(nextPriceStr);
+  if (nextDesc !== (item.description ?? '')) patch.description = nextDesc.trim();
+  if (Object.keys(patch).length === 0) return;
+  ProductApi.update(item.id, patch)
+    .then(() => load())
+    .catch((e) => alert('수정 실패: ' + e.message));
 }
 
-function init() {
-  bindControls();
-  loadList();
+function onDelete(id: number) {
+  if (!confirm(`#${id} 삭제할까요?`)) return;
+  ProductApi.remove(id)
+    .then(() => load())
+    .catch((e) => alert('삭제 실패: ' + e.message));
 }
-init();
+
+// 이벤트 바인딩
+createForm.addEventListener('submit', onCreate);
+refreshBtn.addEventListener('click', () => {
+  page = Number(pageInput.value) || 0;
+  size = Number(sizeInput.value) || 10;
+  sort = sortSelect.value || 'id,desc';
+  load();
+});
+prevBtn.addEventListener('click', () => { if (page > 0) { page--; pageInput.value = String(page); load(); } });
+nextBtn.addEventListener('click', () => { page++; pageInput.value = String(page); load(); });
+
+load();

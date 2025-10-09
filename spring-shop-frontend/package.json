@@ -1,14 +1,9 @@
 {
-  "name": "spring-shop-frontend",
-  "version": "0.1.0",
-  "private": true,
   "scripts": {
-    "dev": "node esbuild.config.js --serve",
-    "build": "node esbuild.config.js --prod",
-    "clean": "node -e \"require('fs').rmSync('public/assets',{recursive:true,force:true})\""
+    "dev": "node esbuild.config.js",
+    "build": "esbuild src/main.ts --bundle --outfile=public/assets/main.js"
   },
   "devDependencies": {
-    "esbuild": "^0.23.0",
-    "typescript": "^5.6.3"
+    "esbuild": "^0.25.10"
   }
 }

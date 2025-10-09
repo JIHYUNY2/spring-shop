@@ -1,9 +1,9 @@
 package com.example.shop.common;
 
-public record ApiResponse<T>(boolean success, T data, ErrorBody error) {
+public record ApiResponse<T>(boolean success, T data, ApiError error) {
   public static <T> ApiResponse<T> ok(T data) { return new ApiResponse<>(true, data, null); }
-  public static ApiResponse<?> fail(ErrorCode code, String message) {
-    return new ApiResponse<>(false, null, new ErrorBody(code.name(), message));
+  public static <T> ApiResponse<T> fail(String code, String message) {
+    return new ApiResponse<>(false, null, new ApiError(code, message));
   }
-  public record ErrorBody(String code, String message) {}
+  public record ApiError(String code, String message) {}
 }

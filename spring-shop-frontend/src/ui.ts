@@ -1,21 +1,21 @@
-export const qs = <T extends Element = Element>(s: string) =>
-  document.querySelector(s) as T | null;
+export const $ = (sel: string, root: ParentNode | Document = document) =>
+  root.querySelector(sel) as HTMLElement;
 
-export const el = (tag: string, attrs: Record<string, any> = {}, children: (Node | string)[] = []) => {
-  const n = document.createElement(tag);
-  Object.entries(attrs).forEach(([k, v]) => (k in n ? (n as any)[k] = v : n.setAttribute(k, v)));
-  children.forEach(c => n.append(c instanceof Node ? c : document.createTextNode(String(c))));
-  return n;
-};
-
-export const fmtPrice = (n: number) => `${Number(n).toLocaleString('ko-KR')}원`;
-
-export const loading = (on: boolean) => qs('#loader')?.classList.toggle('show', !!on);
-
-export const toast = (msg: string, type: 'ok' | 'error' = 'ok') => {
-  const box = qs('#toast');
-  if (!box) return;
-  const t = el('div', { className: `toast ${type === 'error' ? 'error' : ''}` }, [msg]);
-  box.appendChild(t);
-  setTimeout(() => t.remove(), 2600);
-};
+export function el<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  attrs: Record<string, any> = {},
+  ...children: (Node | string | null | undefined)[]
+) {
+  const node = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (v === undefined || v === null) return;
+    if (k === 'class') node.className = v;
+    else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2).toLowerCase(), v);
+    else node.setAttribute(k, String(v));
+  });
+  for (const c of children) {
+    if (c === null || c === undefined) continue;
+    node.append(c instanceof Node ? c : document.createTextNode(c));
+  }
+  return node;
+}

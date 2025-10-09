@@ -8,14 +8,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service @Transactional(readOnly = true)
+@Service
+@Transactional(readOnly = true)
 public class ProductService {
+
   private final ProductRepository repo;
+
   public ProductService(ProductRepository repo) { this.repo = repo; }
 
   @Transactional
   public ProductResponse create(ProductCreateRequest req) {
-    Product saved = repo.save(Product.create(req.name(), req.price(), req.description()));
+    var saved = repo.save(Product.create(req.name(), req.price(), req.description()));
     return ProductResponse.of(saved);
   }
 
@@ -24,20 +27,22 @@ public class ProductService {
   }
 
   public ProductResponse get(Long id) {
-    Product p = repo.findById(id).orElseThrow(() -> new NotFoundException("상품이 존재하지 않습니다."));
+    var p = repo.findById(id).orElseThrow(() -> new NotFoundException("Product " + id + " not found"));
     return ProductResponse.of(p);
   }
 
   @Transactional
   public ProductResponse update(Long id, ProductUpdateRequest req) {
-    Product p = repo.findById(id).orElseThrow(() -> new NotFoundException("상품이 존재하지 않습니다."));
-    p.update(req.name(), req.price(), req.description());
+    var p = repo.findById(id).orElseThrow(() -> new NotFoundException("Product " + id + " not found"));
+    p.changeName(req.name());
+    p.changePrice(req.price());
+    p.changeDescription(req.description());
     return ProductResponse.of(p);
   }
 
   @Transactional
   public void delete(Long id) {
-    if (!repo.existsById(id)) throw new NotFoundException("상품이 존재하지 않습니다.");
+    if (!repo.existsById(id)) throw new NotFoundException("Product " + id + " not found");
     repo.deleteById(id);
   }
 }

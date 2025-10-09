@@ -12,28 +12,32 @@ public class Product {
   private String name;
 
   @Column(nullable = false)
-  private Long price; // 원단위
+  private Long price;
 
   @Column(length = 1000)
   private String description;
 
-  @Column(nullable = false, updatable = false)
+  @Column(nullable = false)
   private LocalDateTime createdAt;
 
-  @PrePersist void prePersist() { this.createdAt = LocalDateTime.now(); }
+  protected Product() {}
+
+  private Product(String name, Long price, String description) {
+    this.name = name;
+    this.price = price;
+    this.description = description;
+    this.createdAt = LocalDateTime.now();
+  }
 
   public static Product create(String name, Long price, String description) {
-    Product p = new Product();
-    p.name = name; p.price = price; p.description = description;
-    return p;
+    return new Product(name, price, description);
   }
 
-  public void update(String name, Long price, String description) {
-    if (name != null && !name.isBlank()) this.name = name;
-    if (price != null && price > 0) this.price = price;
-    if (description != null) this.description = description;
-  }
+  public void changeName(String name) { if (name != null) this.name = name; }
+  public void changePrice(Long price) { if (price != null) this.price = price; }
+  public void changeDescription(String d) { if (d != null) this.description = d; }
 
+  // getters
   public Long getId() { return id; }
   public String getName() { return name; }
   public Long getPrice() { return price; }

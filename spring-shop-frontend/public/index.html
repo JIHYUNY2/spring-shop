@@ -1,159 +1,116 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
   <meta charset="utf-8" />
-  <title>Spring Shop — Front (ESBuild)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #0a0f1f; --bg-2: #0e1630; --card: #111a2e; --text: #eef2ff; --muted: #9fb0cc;
-      --border: #23314f; --primary: #76a4ff; --primary-2: #9ac1ff; --ok: #3ddc97; --danger: #ff6b6b;
-      --shadow: 0 10px 30px rgba(10, 15, 31, .45); --radius: 16px; --blur: 10px;
-    }
-    :root[data-theme="light"] {
-      --bg:#f7f9fe; --bg-2:#ebf2ff; --card:#ffffffcc; --text:#0b1020; --muted:#5a6a84;
-      --border:#d9e3f5; --primary:#3b82f6; --primary-2:#60a5fa; --ok:#10b981; --danger:#ef4444;
-      --shadow:0 10px 25px rgba(13,35,69,.12); --blur:8px;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Apple SD Gothic Neo,Helvetica,Arial;color:var(--text);
-      background:
-        radial-gradient(1200px 600px at 70% -20%, #3353ff22 0%, transparent 60%),
-        radial-gradient(1000px 500px at -10% 10%, #6affcf1a 0%, transparent 60%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);}
-    .bg-orn{position:fixed;inset:0;pointer-events:none;z-index:0;background:
-      radial-gradient(650px 300px at 80% 20%, #7aa1ff22 0%, transparent 70%),
-      radial-gradient(550px 280px at 15% 85%, #43e5a81f 0%, transparent 70%);}
-    header{position:sticky;top:0;z-index:20;backdrop-filter:blur(var(--blur));
-      background:color-mix(in srgb, var(--bg-2) 60%, transparent);border-bottom:1px solid var(--border)}
-    .container{max-width:1120px;margin:0 auto;padding:18px 20px;position:relative;z-index:1}
-    .toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
-    .badge{font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
-    main .row{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
-    @media (max-width:980px){main .row{grid-template-columns:1fr}}
-    .card{background:var(--card);border:1px solid color-mix(in srgb,var(--border) 70%,transparent);
-      border-radius:var(--radius);box-shadow:var(--shadow);overflow:clip;backdrop-filter:blur(calc(var(--blur)*.7))}
-    .panel{padding:16px}
-    h1,h2,h3{margin:0} h2{font-size:20px}
-    input,select,button,textarea{background:color-mix(in srgb,var(--bg-2) 75%,transparent);color:var(--text);
-      border:1px solid var(--border);border-radius:12px;padding:10px 12px;outline:none;
-      transition:border-color .15s,box-shadow .15s,transform .04s}
-    input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 30%,transparent)}
-    button{cursor:pointer;font-weight:700} button.primary{background:linear-gradient(180deg,var(--primary),var(--primary-2));color:#0b1020;border:0}
-    button.ghost{background:transparent} button.danger{background:linear-gradient(180deg,var(--danger),#ff8585);color:#1a0a0a;border:0}
-    button:active{transform:translateY(1px)} button[disabled]{opacity:.6;cursor:not-allowed}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-    .product{padding:14px;border-radius:calc(var(--radius) - 4px);border:1px solid color-mix(in srgb,var(--border) 70%,transparent);
-      background:linear-gradient(180deg,color-mix(in srgb,var(--card) 70%,transparent),transparent),
-                 radial-gradient(400px 120px at 20% 0%, #7aa1ff1a, transparent 60%);
-      transition:transform .15s,box-shadow .15s}
-    .product:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,0,0,.25)}
-    .price{font-weight:900}.muted{color:var(--muted);font-size:13px}
-    .pager{display:flex;align-items:center;justify-content:space-between;padding-top:8px}
-    dialog{border:none;border-radius:18px;max-width:620px;width:calc(100% - 24px);background:var(--card);color:var(--text);box-shadow:var(--shadow)}
-    dialog::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(var(--blur))}
-    .modal-head,.modal-foot{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-    .modal-body{padding:16px}.modal-foot{border-bottom:none;border-top:1px solid var(--border)}
-    #toast{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:9999}
-    .toast{background:color-mix(in srgb,var(--bg-2) 85%,transparent);border:1px solid var(--border);border-left:4px solid var(--ok);
-      padding:10px 12px;border-radius:12px;min-width:220px;box-shadow:var(--shadow)}
-    .toast.error{border-left-color:var(--danger)}
-    .loader{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9998}
-    .loader.show{display:flex}
-    .spinner{width:38px;height:38px;border:3px solid color-mix(in srgb,var(--border) 65%,transparent);border-top-color:var(--primary);
-      border-radius:50%;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
+  <title>Spring Shop — Products</title>
+  <link rel="stylesheet" href="/assets/styles.css?v=3" />
 </head>
 <body>
-  <div class="bg-orn"></div>
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <div class="brand">
+        <span class="logo">🛒</span>
+        <div>
+          <h1>Spring Shop</h1>
+          <p class="sub">상품 등록 / 목록 / 수정 / 삭제 (ESBuild + Vanilla)</p>
+        </div>
+      </div>
 
-  <header>
-    <div class="container toolbar">
-      <div class="brand"><span style="font-size:20px">🛒</span><span>Spring Shop</span><span class="badge">Frontend</span></div>
-      <div class="toolbar" style="gap:8px">
-        <a href="/swagger-ui/index.html">Swagger</a>
-        <button id="themeToggle" class="ghost" title="테마 전환">🌓</button>
-        <button id="openCreate" class="primary">+ 상품 등록</button>
+      <div class="toolbar">
+        <button id="themeToggle" class="btn btn-outline" aria-label="테마 전환">☀︎ 라이트</button>
+        <button id="refreshBtn" class="btn btn-outline">새로고침</button>
       </div>
     </div>
   </header>
 
-  <main class="container">
-    <div class="row">
-      <section class="panel card">
-        <div class="toolbar" style="margin-bottom:8px">
-          <h2>상품 목록</h2>
-          <div style="display:flex; gap:8px">
-            <label class="muted">정렬
-              <select id="sort">
-                <option value="id,desc">최근 등록순</option>
-                <option value="price,asc">가격↑</option>
-                <option value="price,desc">가격↓</option>
-                <option value="name,asc">이름 A→Z</option>
-              </select>
-            </label>
-            <label class="muted">페이지 크기
-              <select id="size">
-                <option>10</option><option selected>20</option><option>50</option>
-              </select>
-            </label>
-          </div>
+  <!-- Main -->
+  <main class="container grid">
+    <!-- 등록 카드 -->
+    <section class="card">
+      <div class="card__head">
+        <h2>상품 등록</h2>
+        <span class="badge badge-primary">Create</span>
+      </div>
+
+      <form id="createForm" class="form">
+        <div class="form__row">
+          <label class="form__field">
+            <span class="form__label">이름</span>
+            <input id="name" class="input" required maxlength="100" placeholder="예: 딸기 쿠키" />
+          </label>
+
+          <label class="form__field">
+            <span class="form__label">가격(원)</span>
+            <input id="price" class="input" type="number" min="1" step="1" required placeholder="예: 1300" />
+          </label>
         </div>
 
-        <div id="list" class="grid"></div>
-        <div id="empty" class="card" style="padding:20px; text-align:center; display:none">
-          상품이 없습니다. <b>+ 상품 등록</b>으로 추가하세요.
-        </div>
+        <label class="form__field">
+          <span class="form__label">설명</span>
+          <textarea id="description" class="input" maxlength="1000" placeholder="예: 달콤한 딸기 쿠키"></textarea>
+        </label>
 
-        <div class="pager">
-          <div class="muted" id="pageInfo">0 / 0</div>
-          <div style="display:flex; gap:8px">
-            <button id="prev" class="ghost">이전</button>
-            <button id="next" class="ghost">다음</button>
-          </div>
+        <div class="form__actions">
+          <button type="submit" class="btn btn-primary">등록</button>
         </div>
-      </section>
+      </form>
 
-      <aside class="panel card">
-        <h2 style="margin-top:0">빠른 등록</h2>
-        <form id="createForm">
-          <div style="display:grid; gap:10px">
-            <label>이름
-              <input required name="name" maxlength="100" placeholder="예: Basic T-Shirt" />
-            </label>
-            <label>가격(원)
-              <input required name="price" type="number" min="1" step="1" placeholder="19900" />
-            </label>
-            <label>설명
-              <textarea name="description" rows="4" maxlength="1000" placeholder="선택"></textarea>
-            </label>
-            <button class="primary" type="submit">등록</button>
-          </div>
-        </form>
-      </aside>
-    </div>
+      <div id="createMsg" class="msg"></div>
+    </section>
+
+    <!-- 목록 카드 -->
+    <section class="card">
+      <div class="card__head">
+        <h2>상품 목록</h2>
+        <span class="badge">Read</span>
+      </div>
+
+      <div class="filters">
+        <label class="filters__item">
+          <span class="form__label">페이지</span>
+          <input id="page" class="input input--sm" type="number" min="0" value="0" />
+        </label>
+        <label class="filters__item">
+          <span class="form__label">개수</span>
+          <input id="size" class="input input--sm" type="number" min="1" value="10" />
+        </label>
+        <label class="filters__item">
+          <span class="form__label">정렬</span>
+          <select id="sort" class="input input--sm">
+            <option value="id,desc">id,desc (최신순)</option>
+            <option value="price,asc">price,asc (가격↑)</option>
+            <option value="price,desc">price,desc (가격↓)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" id="listTable">
+          <thead>
+            <tr>
+              <th>ID</th><th>이름</th><th>가격</th><th>설명</th><th style="width:160px">액션</th>
+            </tr>
+          </thead>
+          <tbody id="listBody"></tbody>
+        </table>
+      </div>
+
+      <div class="list__footer">
+        <div id="pageInfo" class="muted"></div>
+        <div class="actions">
+          <button id="prevBtn" class="btn btn-outline">이전</button>
+          <button id="nextBtn" class="btn btn-outline">다음</button>
+        </div>
+      </div>
+
+      <div id="listMsg" class="msg"></div>
+    </section>
   </main>
 
-  <!-- 상세 모달 -->
-  <dialog id="detailModal" aria-labelledby="detailTitle">
-    <div class="modal-head">
-      <strong id="detailTitle">상품 상세</strong>
-      <button id="closeModal" class="ghost">닫기</button>
-    </div>
-    <div class="modal-body" id="detailBody"></div>
-    <div class="modal-foot">
-      <button id="deleteBtn" class="danger">삭제</button>
-      <button id="closeModal2">확인</button>
-    </div>
-  </dialog>
+  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- 토스트/로딩 -->
-  <div class="loader" id="loader"><div class="spinner" role="status" aria-label="Loading"></div></div>
-  <div id="toast" aria-live="polite"></div>
-
-  <!-- 번들된 JS -->
-  <script type="module" src="/assets/main.js"></script>
+  <script src="/assets/main.js" type="module"></script>
 </body>
 </html>

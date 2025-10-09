@@ -1,0 +1,185 @@
+/* ---------- Theme Tokens ---------- */
+/* 기본은 다크 */
+:root{
+  --bg:#0b1020;
+  --surface:#0e1530;
+  --card:#121a3a;
+  --card-2:#0f1733;
+  --muted:#9ca3af;
+  --text:#e5e7eb;
+  --border:rgba(255,255,255,.08);
+  --primary:#7c9cff;
+  --primary-2:#5a7cff;
+  --accent:#22d3ee;
+  --danger:#ef4444;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --radius:14px;
+}
+
+/* 라이트 모드 토큰 오버라이드 */
+html[data-theme="light"]{
+  --bg:#f7f7fb;
+  --surface:#ffffff;
+  --card:#ffffff;
+  --card-2:#f9fafb;
+  --muted:#6b7280;
+  --text:#1f2937;
+  --border:rgba(0,0,0,.12);
+  --primary:#2563eb;
+  --primary-2:#1e40af;
+  --accent:#0891b2;
+  --danger:#ef4444;
+  --shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+/* ---------- Base ---------- */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Noto Sans KR, system-ui, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1000px 600px at -10% -10%, #1b2452 0%, transparent 60%),
+    radial-gradient(900px 600px at 110% -5%, #0c7185 0%, transparent 50%),
+    radial-gradient(900px 600px at 50% 120%, #1b2452 0%, transparent 60%),
+    var(--bg);
+  transition: background .3s ease, color .2s ease;
+}
+/* 라이트에서는 단색 배경 */
+html[data-theme="light"] body{
+  background: var(--bg);
+}
+
+/* ---------- Layout ---------- */
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.grid{display:grid;grid-template-columns:1fr 1.4fr;gap:20px}
+@media (max-width: 1050px){ .grid{grid-template-columns:1fr} }
+
+/* ---------- Topbar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:20;
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+  backdrop-filter: blur(8px);
+  border-bottom:1px solid var(--border);
+}
+html[data-theme="light"] .topbar{
+  background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,0));
+}
+.topbar__inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{font-size:30px; filter: drop-shadow(0 4px 10px rgba(124,156,255,.5));}
+h1{font-size:26px; line-height:1.1; margin:0}
+.sub{margin:2px 0 0; color:var(--muted); font-size:12px}
+.toolbar{display:flex;gap:10px}
+
+/* ---------- Card ---------- */
+.card{
+  background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  padding:18px;
+  box-shadow: var(--shadow);
+  transition: background .3s ease, border-color .2s ease, box-shadow .2s ease;
+}
+html[data-theme="light"] .card{
+  background: var(--card);
+}
+
+/* ---------- Badges ---------- */
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px; color:#cbd5e1; background:rgba(255,255,255,.06);
+  border:1px solid var(--border); padding:4px 8px; border-radius:999px;
+}
+.badge-primary{ background:rgba(124,156,255,.15); border-color:rgba(124,156,255,.4); color:#dbe6ff }
+html[data-theme="light"] .badge{ color:#334155; background:#eef2ff }
+
+/* ---------- Form ---------- */
+.form{display:flex;flex-direction:column;gap:12px}
+.form__row{display:flex;gap:12px}
+@media (max-width: 680px){ .form__row{flex-direction:column} }
+.form__field{display:flex;flex-direction:column;gap:6px;flex:1}
+.form__label{font-size:12px;color:var(--muted)}
+
+.input{
+  width:100%; padding:12px 14px; font-size:14px; color:var(--text);
+  background: rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  border-radius:10px; outline:none;
+  transition: border .2s, box-shadow .2s, background .2s;
+}
+.input:focus{
+  border-color: rgba(124,156,255,.6);
+  box-shadow: 0 0 0 4px rgba(124,156,255,.15);
+  background: rgba(255,255,255,.06);
+}
+.input--sm{padding:10px 12px}
+html[data-theme="light"] .input{ background:#fff }
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 14px; font-weight:600; font-size:14px;
+  border-radius:10px; border:1px solid var(--border); color:var(--text);
+  background: rgba(255,255,255,.06); cursor:pointer; transition: all .2s ease;
+}
+.btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.25) }
+.btn:active{ transform: translateY(0) scale(.98) }
+
+.btn-primary{
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-2) 100%);
+  border-color: rgba(124,156,255,.6); color:#0b1020;
+  text-shadow: 0 1px 0 rgba(255,255,255,.4);
+}
+.btn-primary:hover{ filter: brightness(1.05) }
+
+.btn-outline{
+  background: transparent;
+  border-color: rgba(255,255,255,.25);
+}
+html[data-theme="light"] .btn-outline{ border-color: rgba(0,0,0,.18); background:#fff }
+
+.btn-danger{
+  background: linear-gradient(180deg, #ff6b6b 0%, #ef4444 100%);
+  border-color: rgba(239,68,68,.7); color:#0b1020;
+}
+
+/* ---------- Filters ---------- */
+.filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.filters__item{min-width:160px}
+
+/* ---------- Table ---------- */
+.table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--border)}
+.table{
+  width:100%; border-collapse: collapse; min-width:720px;
+  background: rgba(255,255,255,.02);
+}
+.table th, .table td{
+  padding:12px 14px; text-align:left; border-bottom:1px solid var(--border);
+}
+.table thead th{
+  font-size:12px; color:#cbd5e1; letter-spacing:.02em;
+  background: rgba(255,255,255,.04);
+  position:sticky; top:0; backdrop-filter: blur(4px);
+}
+html[data-theme="light"] .table thead th{ color:#475569; background:#f8fafc }
+.table tbody tr:hover{ background: rgba(255,255,255,.03) }
+.table td .actions{ display:flex; gap:8px }
+.table .btn{ padding:8px 10px; font-size:12px }
+.table .btn + .btn{ margin-left:6px }
+
+/* ---------- Page footer ---------- */
+.list__footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.muted{color:var(--muted)}
+.msg{margin-top:8px;min-height:1.2em}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed; right:20px; bottom:20px; z-index:50;
+  display:none; min-width:220px; padding:12px 14px; border-radius:12px;
+  color:#0b1020; background:#d1fae5; box-shadow: var(--shadow);
+  border:1px solid rgba(16,185,129,.4);
+}
+.toast.show{display:block; animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}

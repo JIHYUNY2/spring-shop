@@ -1,116 +1,106 @@
 <!doctype html>
-<html lang="ko" data-theme="dark">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spring Shop — Products</title>
-  <link rel="stylesheet" href="/assets/styles.css?v=3" />
-</head>
-<body>
-  <!-- Top Bar -->
-  <header class="topbar">
-    <div class="container topbar__inner">
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spring Shop</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar container">
       <div class="brand">
-        <span class="logo">🛒</span>
-        <div>
-          <h1>Spring Shop</h1>
-          <p class="sub">상품 등록 / 목록 / 수정 / 삭제 (ESBuild + Vanilla)</p>
-        </div>
+        <span class="cart">🛒</span>
+        <span>Spring Shop</span>
+        <small>상품 등록 / 목록 / 수정 / 삭제 (ESBuild + Vanilla)</small>
       </div>
-
-      <div class="toolbar">
-        <button id="themeToggle" class="btn btn-outline" aria-label="테마 전환">☀︎ 라이트</button>
-        <button id="refreshBtn" class="btn btn-outline">새로고침</button>
+      <div class="actions">
+        <button id="themeToggle" class="btn">🌙 다크</button>
+        <button id="refreshBtn" class="btn btn-primary">새로고침</button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Main -->
-  <main class="container grid">
-    <!-- 등록 카드 -->
-    <section class="card">
-      <div class="card__head">
+    <main class="container grid-2">
+      <!-- 상품 등록 -->
+      <section class="card">
         <h2>상품 등록</h2>
-        <span class="badge badge-primary">Create</span>
-      </div>
 
-      <form id="createForm" class="form">
-        <div class="form__row">
-          <label class="form__field">
-            <span class="form__label">이름</span>
-            <input id="name" class="input" required maxlength="100" placeholder="예: 딸기 쿠키" />
+        <form id="createForm" class="form">
+          <label>이름
+            <input id="name" placeholder="예: 딸기 쿠키" />
           </label>
 
-          <label class="form__field">
-            <span class="form__label">가격(원)</span>
-            <input id="price" class="input" type="number" min="1" step="1" required placeholder="예: 1300" />
+          <label>가격(원)
+            <input id="price" placeholder="예: 1300" inputmode="numeric" />
           </label>
-        </div>
 
-        <label class="form__field">
-          <span class="form__label">설명</span>
-          <textarea id="description" class="input" maxlength="1000" placeholder="예: 달콤한 딸기 쿠키"></textarea>
-        </label>
+          <label>설명
+            <textarea id="description" placeholder="예: 달콤한 딸기 쿠키"></textarea>
+          </label>
 
-        <div class="form__actions">
-          <button type="submit" class="btn btn-primary">등록</button>
-        </div>
-      </form>
+          <label>초기 재고(개)
+            <input id="initStock" placeholder="예: 100" inputmode="numeric" />
+          </label>
 
-      <div id="createMsg" class="msg"></div>
-    </section>
+          <div class="row right">
+            <button id="createBtn" class="btn btn-primary" type="submit">등록</button>
+          </div>
 
-    <!-- 목록 카드 -->
-    <section class="card">
-      <div class="card__head">
+          <p id="createMsg" class="hint"></p>
+        </form>
+      </section>
+
+      <!-- 상품 목록 -->
+      <section class="card">
         <h2>상품 목록</h2>
-        <span class="badge">Read</span>
-      </div>
 
-      <div class="filters">
-        <label class="filters__item">
-          <span class="form__label">페이지</span>
-          <input id="page" class="input input--sm" type="number" min="0" value="0" />
-        </label>
-        <label class="filters__item">
-          <span class="form__label">개수</span>
-          <input id="size" class="input input--sm" type="number" min="1" value="10" />
-        </label>
-        <label class="filters__item">
-          <span class="form__label">정렬</span>
-          <select id="sort" class="input input--sm">
-            <option value="id,desc">id,desc (최신순)</option>
-            <option value="price,asc">price,asc (가격↑)</option>
-            <option value="price,desc">price,desc (가격↓)</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="table-wrap">
-        <table class="table" id="listTable">
-          <thead>
-            <tr>
-              <th>ID</th><th>이름</th><th>가격</th><th>설명</th><th style="width:160px">액션</th>
-            </tr>
-          </thead>
-          <tbody id="listBody"></tbody>
-        </table>
-      </div>
-
-      <div class="list__footer">
-        <div id="pageInfo" class="muted"></div>
-        <div class="actions">
-          <button id="prevBtn" class="btn btn-outline">이전</button>
-          <button id="nextBtn" class="btn btn-outline">다음</button>
+        <div class="toolbar">
+          <label>페이지
+            <input id="page" value="0" inputmode="numeric" />
+          </label>
+          <label>개수
+            <input id="size" value="10" inputmode="numeric" />
+          </label>
+          <label>정렬
+            <select id="sort">
+              <option value="id,desc" selected>id,desc (최신순)</option>
+              <option value="id,asc">id,asc</option>
+              <option value="price,asc">price,asc</option>
+              <option value="price,desc">price,desc</option>
+            </select>
+          </label>
         </div>
-      </div>
 
-      <div id="listMsg" class="msg"></div>
-    </section>
-  </main>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>이름</th>
+                <th>가격</th>
+                <th>설명</th>
+                <th>재고</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody id="listBody"></tbody>
+          </table>
+        </div>
 
-  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+        <div class="row space-between">
+          <span id="pageInfo" class="muted">페이지 1 / 1 · 총 0개</span>
+          <div class="row gap">
+            <button id="prevBtn" class="btn" disabled>이전</button>
+            <button id="nextBtn" class="btn" disabled>다음</button>
+          </div>
+        </div>
+        <p id="listMsg" class="hint"></p>
+      </section>
+    </main>
 
-  <script src="/assets/main.js" type="module"></script>
-</body>
+    <!-- 전역 로딩 스피너 / 토스트 -->
+    <div id="globalSpinner" class="spinner" hidden></div>
+    <div id="toast"></div>
+
+    <script type="module" src="/assets/main.js"></script>
+  </body>
 </html>

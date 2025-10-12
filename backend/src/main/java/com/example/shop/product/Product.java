@@ -1,4 +1,4 @@
-package com.example.shop.product.domain;
+package com.example.shop.product;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

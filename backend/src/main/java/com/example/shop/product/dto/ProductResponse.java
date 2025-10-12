@@ -1,7 +1,8 @@
 package com.example.shop.product.dto;
 
-import com.example.shop.product.domain.Product;
 import java.time.LocalDateTime;
+
+import com.example.shop.product.Product;
 
 public record ProductResponse(Long id, String name, Long price, String description, LocalDateTime createdAt) {
   public static ProductResponse of(Product p) {

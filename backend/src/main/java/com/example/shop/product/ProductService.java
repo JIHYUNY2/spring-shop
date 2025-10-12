@@ -1,7 +1,6 @@
 package com.example.shop.product;
 
 import com.example.shop.common.NotFoundException;
-import com.example.shop.product.domain.Product;
 import com.example.shop.product.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

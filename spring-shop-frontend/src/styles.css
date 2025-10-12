@@ -25,3 +25,5 @@ button:hover { border-color:var(--primary); color:var(--primary); }
 input[type="number"] { width:120px; }
 textarea { min-height:72px; resize:vertical; }
 @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+[hidden] { display: none !important; }
+.spinner-backdrop[hidden] { display: none !important; }
